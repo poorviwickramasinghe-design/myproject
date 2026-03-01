@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 // Import your screens
@@ -47,7 +45,6 @@ class SmartBudgetApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: themeProvider.themeMode,
 
-      // Light Theme
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
@@ -56,7 +53,6 @@ class SmartBudgetApp extends StatelessWidget {
         inputDecorationTheme: _buildInputTheme(kTealColor, Brightness.light),
       ),
 
-      // Dark Theme
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -65,14 +61,15 @@ class SmartBudgetApp extends StatelessWidget {
         inputDecorationTheme: _buildInputTheme(kTealColor, Brightness.dark),
       ),
 
-      // Define named routes for the logout/navigation logic
+      // Define named routes
       routes: {
+        '/onboarding': (context) => const OnboardingScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/dashboard': (context) => const DashboardScreen(),
       },
 
-      // The home is now the RootWrapper which decides the start screen
+      // Start with the RootWrapper
       home: const RootWrapper(),
     );
   }
@@ -95,47 +92,14 @@ class SmartBudgetApp extends StatelessWidget {
   }
 }
 
-/// This class handles the logic: Onboarding -> Login -> Dashboard
+/// MODIFIED: Always starts with SplashScreen
 class RootWrapper extends StatelessWidget {
   const RootWrapper({super.key});
 
-  Future<bool> _checkFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Returns true if 'isFirstTime' is null (first launch)
-    return prefs.getBool('isFirstTime') ?? true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkFirstTime(),
-      builder: (context, firstTimeSnapshot) {
-        // While checking SharedPreferences, show a splash or loader
-        if (firstTimeSnapshot.connectionState == ConnectionState.waiting) {
-          return const SplashScreen();
-        }
-
-        // 1. Check if it's the very first time opening the app
-        if (firstTimeSnapshot.data == true) {
-          return const OnboardingScreen();
-        }
-
-        // 2. If not first time, check if the user is already logged in
-        return StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, authSnapshot) {
-            if (authSnapshot.connectionState == ConnectionState.waiting) {
-              return const SplashScreen();
-            }
-
-            if (authSnapshot.hasData) {
-              return const DashboardScreen(); // Logged in? Go to Dashboard
-            } else {
-              return const LoginScreen(); // Not logged in? Go to Login
-            }
-          },
-        );
-      },
-    );
+    // We always return SplashScreen first.
+    // The SplashScreen.dart logic will handle the timer and push to Onboarding.
+    return const SplashScreen();
   }
 }

@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Required for saving state
-
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
-  // --- Logic to save first-time state ---
-  Future<void> _completeOnboarding(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isFirstTime', false); // Mark onboarding as seen
-
-    if (!context.mounted) return;
-
-    // Use pushReplacementNamed to go to login so the user can't "Go Back" to onboarding
+  // --- Simplified Navigation Logic ---
+  void _navigateToNext(BuildContext context) {
+    // Since you want to see this every time, we just move to the next screen.
+    // Replace '/login' with your actual route name or widget.
     Navigator.pushReplacementNamed(context, '/login');
   }
 
@@ -38,14 +32,16 @@ class OnboardingScreen extends StatelessWidget {
                   height: 140,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.teal.withValues(alpha: .1),
+                    color: kTealColor.withOpacity(0.1),
                   ),
                   child: ClipOval(
                     child: Image.asset(
                       "assets/images/onboarding.png",
-                      width: 50,
-                      height: 50,
+                      width: 100,
+                      height: 100,
                       fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.auto_graph, size: 60, color: kTealColor),
                     ),
                   ),
                 ),
@@ -99,7 +95,7 @@ class OnboardingScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12)
                     ),
                   ),
-                  onPressed: () => _completeOnboarding(context), // Logic call
+                  onPressed: () => _navigateToNext(context),
                   child: const Text(
                       "Next",
                       style: TextStyle(
